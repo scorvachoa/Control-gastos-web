@@ -1,8 +1,14 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 import pandas as pd
 from google.oauth2 import service_account
 import gspread
 from datetime import datetime
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+import openpyxl
 
 app = Flask(__name__)
 
@@ -83,6 +89,81 @@ def reporte_mensual():
     total = float(df["Monto"].sum())
 
     return jsonify({"reporte": reporte, "total": total})
+
+
+@app.route("/descargar_pdf")
+def descargar_pdf():
+    df = obtener_datos_google_sheets()
+    if df.empty:
+        return "No hay datos para generar el PDF", 400
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    elements = []
+    styles = getSampleStyleSheet()
+
+    # --- Título principal ---
+    elements.append(Paragraph("📊 Reporte Mensual de Gastos", styles["Title"]))
+    elements.append(Spacer(1, 12))
+
+    # --- Tabla de resumen ---
+    data = [["Categoría", "Monto (S/.)"]]
+    resumen = df.groupby("Categoría")["Monto"].sum().reset_index()
+    for _, row in resumen.iterrows():
+        data.append([row["Categoría"], f"S/ {row['Monto']:.2f}"])
+
+    table = Table(data, colWidths=[200, 150])
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#007bff")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    elements.append(table)
+    elements.append(Spacer(1, 12))
+
+    # --- Total general ---
+    total = resumen["Monto"].sum()
+    elements.append(Paragraph(f"<b>Total general:</b> S/ {total:.2f}", styles["Normal"]))
+    elements.append(Spacer(1, 20))
+
+    # --- Fecha de generación ---
+    fecha_actual = datetime.now().strftime("%d/%m/%Y a las %H:%M")
+    elements.append(Paragraph(f"<i>Generado el {fecha_actual}</i>", styles["Normal"]))
+
+    # --- Crear el PDF ---
+    doc.build(elements)
+    buffer.seek(0)
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="reporte_gastos.pdf",
+        mimetype="application/pdf"
+    )
+
+
+@app.route("/descargar_excel")
+def descargar_excel():
+    df = obtener_datos_google_sheets()
+    if df.empty:
+        return "No hay datos para generar el Excel", 400
+
+    resumen = df.groupby("Categoría")["Monto"].sum().reset_index()
+
+    output = BytesIO()
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Reporte Mensual"
+
+    ws.append(["Categoría", "Monto (S/)"])
+    for _, row in resumen.iterrows():
+        ws.append([row["Categoría"], float(row["Monto"])])
+
+    wb.save(output)
+    output.seek(0)
+    return send_file(output, as_attachment=True, download_name="reporte_gastos.xlsx", mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
 if __name__ == "__main__":

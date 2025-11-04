@@ -14,7 +14,7 @@
             <div class="row">
 
                 <!-- Formulario -->
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="card shadow-sm">
                         <div class="card-body">
                             <h5 class="card-title text-center mb-3">Registrar Gasto</h5>
@@ -42,15 +42,28 @@
                             </form>
                         </div>
                     </div>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-danger me-2" onclick="window.location.href='/descargar_pdf'">
+                            📄 Descargar PDF
+                        </button>
+                        <button class="btn btn-success" onclick="window.location.href='/descargar_excel'">
+                            📊 Descargar Excel
+                        </button>
+                    </div>
+
                 </div>
 
                 <!-- Reporte -->
-                <div class="col-md-8">
+                <div class="col-md-6">
                     <!-- Filtro de fechas -->
-                    <div class="d-flex align-items-center gap-2 mb-3">
-                        <label for="mes" class="form-label mb-0 fw-semibold">Seleccionar mes:</label>
-                        <input type="month" id="mes" class="form-control w-auto" />
-                        <button id="btnFiltrar" class="btn btn-primary">Filtrar</button>
+                    <div class="text-center my-4">
+                        <div class="d-inline-flex align-items-center gap-2">
+                            <label for="mes" class="form-label mb-0 fw-semibold">Seleccionar mes:</label>
+                            <input type="month" id="mes" class="form-control w-auto" />
+                            <button id="btnFiltrar" class="btn btn-primary">
+                                <i class="bi bi-search"></i> Filtrar
+                            </button>
+                        </div>
                     </div>
 
                     <div class="card shadow-sm">

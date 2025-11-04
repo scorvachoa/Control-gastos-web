@@ -3,8 +3,17 @@ const tablaTotales = document.getElementById('tablaTotales');
 const ctx = document.getElementById('graficoGastos').getContext('2d');
 let grafico;
 
-document.getElementById('btnFiltrar').addEventListener('click', () => {
-  cargarReporte(); // Usa la función que ya tienes
+// Establecer el mes actual automáticamente
+window.addEventListener("load", () => {
+  const mesInput = document.getElementById("mes");
+  const ahora = new Date();
+  const mesActual = ahora.toISOString().slice(0, 7); // Ej: "2025-11"
+  mesInput.value = mesActual;
+});
+
+// Filtrar reporte al presionar el botón
+document.getElementById("btnFiltrar").addEventListener("click", () => {
+  cargarReporte(); // Llama a tu función existente
 });
 
 // Enviar gasto
@@ -62,7 +71,7 @@ async function cargarReporte() {
 
     tablaTotales.innerHTML = '';
     categorias.forEach((cat, i) => {
-        tablaTotales.innerHTML += `<tr><td>${cat}</td><td>$${montos[i].toFixed(2)}</td></tr>`;
+        tablaTotales.innerHTML += `<tr><td>${cat}</td><td>S/ ${montos[i].toFixed(2)}</td></tr>`;
     });
 }
 
