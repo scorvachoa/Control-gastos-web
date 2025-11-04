@@ -20,10 +20,6 @@
                             <h5 class="card-title text-center mb-3">Registrar Gasto</h5>
                             <form id="gastoForm">
                                 <div class="mb-3">
-                                    <label for="fecha" class="form-label">Fecha</label>
-                                    <input type="date" id="fecha" class="form-control" required>
-                                </div>
-                                <div class="mb-3">
                                     <label for="categoria" class="form-label">Categoría</label>
                                     <select id="categoria" class="form-select" required>
                                         <option value="">Seleccionar...</option>
@@ -50,6 +46,13 @@
 
                 <!-- Reporte -->
                 <div class="col-md-8">
+                    <!-- Filtro de fechas -->
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <label for="mes" class="form-label mb-0 fw-semibold">Seleccionar mes:</label>
+                        <input type="month" id="mes" class="form-control w-auto" />
+                        <button id="btnFiltrar" class="btn btn-primary">Filtrar</button>
+                    </div>
+
                     <div class="card shadow-sm">
                         <div class="card-body">
                             <h5 class="card-title text-center mb-3">Reporte Mensual</h5>
